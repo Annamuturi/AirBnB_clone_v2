@@ -85,5 +85,6 @@ This project is divided into several tasks, each focusing on a different aspect 
 (hbnb) User.update(<id>, <attribute_name>, <new_value>)
 
 ## AUTHORS
-Anna Muturi
-Gbolahan Oyeniyi
+
+* Anna Muturi <muturiwannah83@gmail.com>
+* Gbolahan Oyeniyi <omgbolahan1@gmail.com>
