@@ -1,2 +1,7 @@
-# Utility folders
+# Utility folders and files
 __pycache__/
+*.swp
+
+# Test files
+main_delete.py
+file.json
