@@ -1,62 +1,50 @@
 #!/usr/bin/env bash
-# sets up the web servers for the deployment of web_static
+# Sets up web servers for the deployment of web_static
 
-# update the package lists
+echo -e "\e[1;32m START\e[0m"
+
+#--Updating the packages
 sudo apt-get -y update
-
-# install nginx
 sudo apt-get -y install nginx
+echo -e "\e[1;32m Packages updated\e[0m"
+echo
 
-# make directories for the deployment using -p to create all parent directories if not existing
-sudo mkdir -p /data/web_static/releases/test 
-sudo mkdir -p /data/web_static/shared
+#--Configure firewall
+sudo ufw allow 'Nginx HTTP'
+echo -e "\e[1;32m Allow incoming NGINX HTTP connections\e[0m"
+echo
 
-# give ownership of the /data/ directory to the ubuntu user 
-sudo chown -R ubuntu /data/
 
-# give group ownership of the /data/ directory to the ubuntu user
-sudo chgrp -R ubuntu /data/
+#--Create directory
+sudo mkdir -p /data/web_static/releases/test /data/web_static/shared
+echo -e "\e[1;32m Directories created\e[0m"
+echo
 
-# create a test HTML file
-echo "Testing! Testing 1 , 2  1 , 2" > /data/web_static/releases/test/index.html
+#--Adds test string
+echo "<h1>Sadio Mane</h1>" > /data/web_static/releases/test/index.html
+echo -e "\e[1;32m Test string added\e[0m"
+echo
 
-# create a symbolic link to the test HTML file
-#---'ln -s' creates a symbolic link
-#---'f' forces the symbolic link to be created if the target already exists, hence overwriting whenever target file is updated
+#--Prevent ovewrite
+if [ -d "/data/web_static/current" ]; then
+    echo "path /data/web_static/current exists"
+    sudo rm -rf /data/web_static/current;
+fi;
+echo -e "\e[1;32m Prevent overwrite\e[0m"
+echo
+
+#--Create symbolic link
 sudo ln -sf /data/web_static/releases/test/ /data/web_static/current
+sudo chown -hR ubuntu:ubuntu /data
 
-# server name not specified
-# listen to port 80
-# [::] listens to IPv6 connections
-# add_header adds a header to the response indicating the server name $HOSTNAME
-# root is the root directory of the server where nginx will look for files to serve
-# index is the default file that nginx will serve if no file is specified in the URL
-# location is the path to the content to be served '/hbnb_static' path to url - https://mydomain.com/hbnb_static
-# alias is the path to the content to be served '/data/web_static/current'. check how to use 'root' and 'alias' in nginx
-# return 301 redirects the client to another URL
-# error_page 404 is the path to the custom 404 page
-# internal is used to prevent nginx from serving the page to the client
-printf %s "server {
-    listen 80 default_server;
-    listen [::]:80 default_server;
-    add_header X-Served-By $HOSTNAME;
-    root   /var/www/html;
-    index  index.html index.htm index.nginx-debian.html;
+#--Modify Nginx configuration to serve /data/web_static/current at /hbnb_static
+sudo sed -i '38i\\tlocation /hbnb_static/ {\n\t\talias /data/web_static/current/;\n\t}\n' /etc/nginx/sites-available/default
 
-    location /hbnb_static {
-        alias /data/web_static/current;
-        index index.html index.htm index.nginx-debian.html 8-index.html;
-    }
+#--Create a symbolic link for Nginx configuration
+sudo ln -sf '/etc/nginx/sites-available/default' '/etc/nginx/sites-enabled/default'
+echo -e "\e[1;32m Symbolic link created\e[0m"
+echo
 
-    location /redirect_me {
-        return 301 https://twitter.com/ai_optimizer;
-    }
-
-    error_page 404 /error_404.html;
-    location /404 {
-      root /var/www/html;
-      internal;
-    }
-}" > /etc/nginx/sites-available/default
-
+#--Restart NGINX
 sudo service nginx restart
+echo -e "\e[1;32m Restarted NGINX\e[0m"
