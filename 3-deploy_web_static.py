@@ -1,5 +1,4 @@
 #!/usr/bin/python3
-# Fabscript to distribute an archive to web server.->2-do_deploy_web_static.py
 import os.path
 from datetime import datetime
 from fabric.api import env
@@ -7,7 +6,7 @@ from fabric.api import local
 from fabric.api import put
 from fabric.api import run
 
-env.hosts = ['52.72.12.225', '18.234.145.87']
+env.hosts = ['18.235.255.120', '52.201.157.77']
 
 
 def do_pack():
